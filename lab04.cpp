@@ -26,7 +26,7 @@ class Warrior
 {
 public:
     virtual ~Warrior() {}
-    virtual int getID() const = 0;
+    virtual char getID() const = 0;
     virtual void print() const = 0;
     virtual int getX() const = 0;
     virtual int getY() const = 0;
@@ -45,14 +45,15 @@ public:
 class MeleeWarrior : public Warrior
 {
 protected:
-    int m_id, m_hp, m_attack, m_range;
+    char m_id;
+    int m_hp, m_attack, m_range;
     int m_x, m_y;
     string m_name;
 
 public:
     MeleeWarrior(const MeleeWarrior &src) : MeleeWarrior(src.m_id, src.m_hp, src.m_attack, src.m_range, src.m_x, src.m_y, src.m_name) {}
     MeleeWarrior(MeleeWarrior &&) = default;
-    MeleeWarrior(int id, int hp, int attack, int range, int x, int y, string name)
+    MeleeWarrior(char id, int hp, int attack, int range, int x, int y, string name)
     {
         m_id = id;
         m_hp = hp;
@@ -68,7 +69,7 @@ public:
         cout << m_name << ": " << m_hp << " " << m_attack << " (" << m_x << ", " << m_y << ") " << endl;
     }
 
-    virtual int getID() const override { return m_id; }
+    virtual char getID() const override { return m_id; }
     virtual int getX() const override { return m_x; }
     virtual int getY() const override { return m_y; }
     virtual int getHP() const override { return m_hp; }
@@ -97,14 +98,15 @@ public:
 class Archer : public Warrior
 {
 protected:
-    int m_id, m_hp, m_attack, m_range;
+    char m_id;
+    int m_hp, m_attack, m_range;
     int m_x, m_y;
     string m_name;
 
 public:
     Archer(const Archer &src) : Archer(src.m_id, src.m_hp, src.m_attack, src.m_range, src.m_x, src.m_y, src.m_name) {}
     Archer(Archer &&) = default;
-    Archer(int id, int hp, int attack, int range, int x, int y, string name)
+    Archer(char id, int hp, int attack, int range, int x, int y, string name)
     {
         m_id = id;
         m_hp = hp;
@@ -120,7 +122,7 @@ public:
         cout << m_name << ": " << m_hp << " " << m_attack << " (" << m_x << ", " << m_y << ") " << endl;
     }
 
-    virtual int getID() const override { return m_id; }
+    virtual char getID() const override { return m_id; }
     virtual int getX() const override { return m_x; }
     virtual int getY() const override { return m_y; }
     virtual int getHP() const override { return m_hp; }
@@ -149,7 +151,7 @@ class Game
 {
 private:
     vector<Warrior *> players;
-    vector<vector<int>> gamepole;
+    vector<vector<char>> gamepole;
     int len;
 
 public:
@@ -186,11 +188,11 @@ public:
                 int random = rand() % 10;
                 if (random < 1)
                 {
-                    gamepole[i][j] = 1;
+                    gamepole[i][j] = '#';
                 }
                 else
                 {
-                    gamepole[i][j] = 0;
+                    gamepole[i][j] = '0';
                 }
             }
         }
@@ -200,11 +202,11 @@ public:
     {
         for (int i = 0; i < players.size(); i++)
         {
-            int x, y, id;
+            int x, y;
+            char id;
             x = players[i]->getX();
             y = players[i]->getY();
-            id = players[i]->getID();
-            gamepole[x][y] = id;
+            gamepole[x][y] = players[i]->getID();
         }
     }
 
@@ -227,7 +229,7 @@ public:
         while (players.size() != 1)
         {
             rotatePlayers();
-            sleep(1);
+            sleep(0);
             system(COMMAND);
             print();
             cout << step << endl;
@@ -252,7 +254,7 @@ public:
                 if (players[i]->getHP() <= 0)
                 {
                     cout << players[i]->getName() << " died" << endl;
-                    gamepole[players[i]->getX()][players[i]->getY()] = 0;
+                    gamepole[players[i]->getX()][players[i]->getY()] = '0';
                     players.erase(players.begin() + i);
                 }
             }
@@ -271,7 +273,7 @@ public:
         {
             if (player->getX() + d.first <= len - 1 && player->getX() + d.first >= 0 && player->getY() + d.second <= len - 1 && player->getY() + d.second >= 0)
             {
-                if (gamepole[player->getX() + d.first][player->getY() + d.second] == 0)
+                if (gamepole[player->getX() + d.first][player->getY() + d.second] == '0')
                 {
                     allowed_moves.push_back(make_pair(d.first, d.second));
                 }
@@ -286,12 +288,12 @@ public:
 
     void moveTo(Warrior *player, pair<int, int> move)
     {
-        if (player->getX() + move.first <= len - 1 && player->getX() + move.first >= 0 && player->getY() + move.second <= len - 1 && player->getY() + move.second >= 0 && gamepole[player->getX() + move.first][player->getY() + move.second] == 0)
+        if (player->getX() + move.first <= len - 1 && player->getX() + move.first >= 0 && player->getY() + move.second <= len - 1 && player->getY() + move.second >= 0 && gamepole[player->getX() + move.first][player->getY() + move.second] == (char)'0')
         {
             gamepole[player->getX() + move.first][player->getY() + move.second] = player->getID();
             player->setX(player->getX() + move.first);
             player->setY(player->getY() + move.second);
-            gamepole[player->getX() - move.first][player->getY() - move.second] = 0;
+            gamepole[player->getX() - move.first][player->getY() - move.second] = '0';
             cout << player->getName() << " moved by (" << player->getX() << ", " << player->getY() << ") " << endl;
         }
         else
@@ -309,14 +311,14 @@ int main()
     int m_x, m_y;
     string m_name;
 
-    MeleeWarrior *me1 = new MeleeWarrior(2, 10, 10, 1, 0, 0, (string) "warrior1");
-    Archer *ar1 = new Archer(3, 10, 5, 3, 0, 3, (string) "archery1");
-    MeleeWarrior *me2 = new MeleeWarrior(4, 10, 10, 1, 3, 0, (string) "warrior2");
-    Archer *ar2 = new Archer(5, 10, 5, 3, 3, 3, (string) "archery2");
-    MeleeWarrior *me3 = new MeleeWarrior(6, 10, 10, 1, 6, 6, (string) "warrior3");
-    Archer *ar3 = new Archer(7, 10, 5, 3, 6, 9, (string) "archery3");
-    MeleeWarrior *me4 = new MeleeWarrior(8, 10, 10, 1, 9, 6, (string) "warrior4");
-    Archer *ar4 = new Archer(9, 10, 5, 3, 9, 9, (string) "archery4");
+    MeleeWarrior *me1 = new MeleeWarrior('2', 10, 10, 1, 0, 0, (string) "warrior1");
+    Archer *ar1 = new Archer('3', 10, 5, 3, 0, 3, (string) "archery1");
+    MeleeWarrior *me2 = new MeleeWarrior('4', 10, 10, 1, 3, 0, (string) "warrior2");
+    Archer *ar2 = new Archer('5', 10, 5, 3, 3, 3, (string) "archery2");
+    MeleeWarrior *me3 = new MeleeWarrior('6', 10, 10, 1, 6, 6, (string) "warrior3");
+    Archer *ar3 = new Archer('7', 10, 5, 3, 6, 9, (string) "archery3");
+    MeleeWarrior *me4 = new MeleeWarrior('8', 10, 10, 1, 9, 6, (string) "warrior4");
+    Archer *ar4 = new Archer('9', 10, 5, 3, 9, 9, (string) "archery4");
 
     vector<Warrior *> players;
     players.push_back(me1);
