@@ -24,7 +24,7 @@ class List{
 				head = element;
 				tail = element;
 				amount += 1;
-			}else{
+			}else{C
 				tail->next = element;
 				tail = tail->next;
 			}
